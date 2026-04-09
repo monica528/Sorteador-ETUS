@@ -1,0 +1,36 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Sorteios: leitura pública, escrita só autenticada (RH)
+    match /sorteios/{sorteioId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+
+      // Participantes: leitura pública, escrita pública (participantes não autenticados)
+      match /participantes/{participanteId} {
+        allow read: if true;
+        // Escrita permitida se email válido e sorteio aberto
+        allow create: if isEmailValido(request.resource.data.email)
+                      && !jaParticipou(sorteioId, request.resource.data.email);
+        allow update, delete: if request.auth != null;
+      }
+    }
+
+    // Admins RH
+    match /admins/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if false;
+    }
+
+    function isEmailValido(email) {
+      return email.matches('.*@etus\\.com\\.br$')
+          || email.matches('.*@brius\\.com\\.br$')
+          || email.matches('.*@bhaz\\.com\\.br$');
+    }
+
+    function jaParticipou(sorteioId, email) {
+      return exists(/databases/$(database)/documents/sorteios/$(sorteioId)/participantes/$(email.replace('@', '_at_').replace('.', '_')));
+    }
+  }
+}

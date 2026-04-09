@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sorteio · Inscrição</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --surface2: #f0efe9;
+    --border: rgba(0,0,0,0.08);
+    --accent: #7c5cfc;
+    --accent-light: rgba(124,92,252,0.08);
+    --accent2: #c084fc;
+    --gold: #d97706;
+    --green: #059669;
+    --red: #dc2626;
+    --text: #18181b;
+    --muted: #71717a;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 1px;
+  }
+  .logo span { color: var(--accent); }
+  .header-rh { font-size: 12px; color: var(--muted); }
+  .header-rh a { color: var(--accent); text-decoration: none; }
+  .header-rh a:hover { text-decoration: underline; }
+
+  /* MAIN */
+  .main {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+  }
+
+  /* LOADING / ERRO / ENCERRADO */
+  .state-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 60px 32px;
+    text-align: center;
+    margin-top: 20px;
+  }
+  .state-icon { font-size: 52px; margin-bottom: 16px; }
+  .state-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+  .state-sub { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+  /* HERO SORTEIO */
+  .sorteio-hero {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px 32px 28px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .sorteio-hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 180px; height: 180px;
+    background: radial-gradient(circle, rgba(124,92,252,0.12) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .hero-emoji { font-size: 48px; margin-bottom: 12px; }
+  .hero-tema {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .hero-nome {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+  .hero-desc { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 20px; }
+
+  .hero-stats {
+    display: flex; gap: 24px; flex-wrap: wrap;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  .stat { }
+  .stat-val { font-size: 22px; font-weight: 700; font-family: 'Syne', sans-serif; }
+  .stat-label { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* COUNTDOWN */
+  .countdown-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .countdown-label { font-size: 13px; color: var(--muted); flex-shrink: 0; }
+  .countdown-timer {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .status-badge {
+    margin-left: auto;
+    padding: 4px 12px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .badge-aberto { background: rgba(5,150,105,0.12); color: var(--green); }
+  .badge-encerrado { background: rgba(113,113,122,0.12); color: var(--muted); }
+  .badge-ainda-nao { background: rgba(245,158,11,0.12); color: var(--gold); }
+
+  /* FORM */
+  .form-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px;
+    margin-bottom: 20px;
+  }
+  .form-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 24px;
+  }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  @media(max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+  .form-group label { font-size: 12px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+  .form-group input {
+    padding: 12px 14px;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-size: 15px;
+    font-family: inherit;
+    outline: none;
+    transition: border 0.2s;
+  }
+  .form-group input:focus { border-color: var(--accent); background: #fff; }
+  .form-group input.error { border-color: var(--red); }
+  .field-err { font-size: 12px; color: var(--red); min-height: 16px; }
+
+  /* OPCOES */
+  .opcoes-titulo { font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+  .opcoes-grid { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+  .opcao-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .opcao-label:hover { border-color: var(--accent); background: var(--accent-light); }
+  .opcao-label input[type=radio], .opcao-label input[type=checkbox] {
+    width: 18px; height: 18px;
+    accent-color: var(--accent);
+    flex-shrink: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+  }
+  .opcao-label.selecionada { border-color: var(--accent); background: var(--accent-light); }
+  .opcao-text { font-size: 15px; font-weight: 500; }
+
+  /* SUBMIT */
+  .btn-submit {
+    width: 100%;
+    padding: 16px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 16px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    letter-spacing: 0.3px;
+  }
+  .btn-submit:hover { opacity: 0.88; }
+  .btn-submit:active { transform: scale(0.99); }
+  .btn-submit:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  /* SUCESSO */
+  .success-card {
+    background: var(--surface);
+    border: 1px solid rgba(5,150,105,0.25);
+    border-radius: 20px;
+    padding: 48px 32px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .success-icon { font-size: 52px; margin-bottom: 16px; }
+  .success-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    color: var(--green);
+  }
+  .success-sub { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .inscricao-box {
+    margin-top: 24px;
+    padding: 16px;
+    background: var(--surface2);
+    border-radius: var(--radius);
+    font-size: 14px;
+    color: var(--muted);
+    text-align: left;
+  }
+  .inscricao-box strong { color: var(--text); }
+
+  /* PARTICIPANTES PÚBLICO */
+  .participantes-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px 32px;
+    margin-bottom: 20px;
+  }
+  .part-header {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;
+  }
+  .part-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .part-count {
+    font-size: 13px; color: var(--muted);
+    background: var(--surface2);
+    padding: 4px 10px;
+    border-radius: 99px;
+  }
+  .part-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .part-chip {
+    padding: 6px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    font-size: 13px;
+    color: var(--text);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .part-chip.ganhador {
+    background: rgba(217,119,6,0.1);
+    border-color: rgba(217,119,6,0.35);
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  /* GANHADORES */
+  .ganhadores-card {
+    background: linear-gradient(135deg, rgba(245,158,11,0.08) 0%, rgba(124,92,252,0.08) 100%);
+    border: 1px solid rgba(245,158,11,0.3);
+    border-radius: 20px;
+    padding: 32px;
+    margin-bottom: 20px;
+  }
+  .ganhadores-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  .ganhador-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    background: rgba(255,255,255,0.7);
+    border: 1px solid rgba(245,158,11,0.25);
+    border-radius: var(--radius);
+    margin-bottom: 10px;
+  }
+  .ganhador-num {
+    width: 32px; height: 32px;
+    background: var(--gold);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+  }
+  .ganhador-nome { font-weight: 600; font-size: 16px; }
+  .ganhador-opcao { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    padding: 14px 24px;
+    background: var(--text);
+    color: #fff;
+    border-radius: var(--radius);
+    font-size: 14px;
+    z-index: 9999;
+    opacity: 0;
+    transition: all 0.3s;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  .toast.error { background: var(--red); }
+  .toast.success { background: var(--green); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">SORTEIO<span>RH</span></div>
+  <div class="header-rh">RH? <a href="rh.html">Acessar painel →</a></div>
+</header>
+
+<div class="main" id="main-content">
+  <div class="state-box">
+    <div class="state-icon">⏳</div>
+    <div class="state-title">Carregando...</div>
+    <div class="state-sub">Buscando informações do sorteio.</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import {
+  getFirestore, doc, getDoc, collection, getDocs, addDoc,
+  onSnapshot, query, orderBy, serverTimestamp
+} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// =============================================
+// 🔥 CONFIGURAÇÃO FIREBASE — SUBSTITUA AQUI
+// =============================================
+const firebaseConfig = {
+  apiKey: "SUA_API_KEY",
+  authDomain: "SEU_PROJETO.firebaseapp.com",
+  projectId: "SEU_PROJETO_ID",
+  storageBucket: "SEU_PROJETO.appspot.com",
+  messagingSenderId: "SEU_SENDER_ID",
+  appId: "SEU_APP_ID"
+};
+// =============================================
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const DOMINIOS = ['@etus.com.br', '@brius.com.br', '@bhaz.com.br'];
+const params = new URLSearchParams(window.location.search);
+const sorteioId = params.get('sorteio');
+const main = document.getElementById('main-content');
+
+let sorteioData = null;
+let inscritoEmail = null;
+let countdownInterval = null;
+
+// ---------- UTILS ----------
+function escHtml(str = '') {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.className = 'toast', 3500);
+}
+
+function fmtCountdown(ms) {
+  if (ms <= 0) return '00:00:00';
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  const s = Math.floor((ms % 60000) / 1000);
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function emailParaId(email) {
+  return email.replace(/[@.]/g, '_');
+}
+
+// ---------- CARREGAR ----------
+if (!sorteioId) {
+  main.innerHTML = `
+    <div class="state-box">
+      <div class="state-icon">🔗</div>
+      <div class="state-title">Link inválido</div>
+      <div class="state-sub">Este link não corresponde a nenhum sorteio.<br>Solicite ao RH o link correto.</div>
+    </div>`;
+} else {
+  carregarSorteio();
+}
+
+async function carregarSorteio() {
+  try {
+    const sorteioRef = doc(db, 'sorteios', sorteioId);
+    // Escuta em tempo real
+    onSnapshot(sorteioRef, async (snap) => {
+      if (!snap.exists()) {
+        main.innerHTML = `
+          <div class="state-box">
+            <div class="state-icon">❌</div>
+            <div class="state-title">Sorteio não encontrado</div>
+            <div class="state-sub">Este sorteio não existe ou foi removido.</div>
+          </div>`;
+        return;
+      }
+      sorteioData = snap.data();
+      sorteioData.id = sorteioId;
+
+      const partSnap = await getDocs(collection(db, 'sorteios', sorteioId, 'participantes'));
+      const participantes = partSnap.docs.map(d => d.data());
+      renderPage(sorteioData, participantes);
+    });
+  } catch(e) {
+    main.innerHTML = `<div class="state-box"><div class="state-icon">⚠️</div><div class="state-title">Erro</div><div class="state-sub">${e.message}</div></div>`;
+  }
+}
+
+function renderPage(s, participantes) {
+  if (countdownInterval) clearInterval(countdownInterval);
+  main.innerHTML = '';
+
+  const agora = Date.now();
+  const inicio = s.inicio?.toMillis?.() || s.inicio?.seconds * 1000 || 0;
+  const fim = s.fim?.toMillis?.() || s.fim?.seconds * 1000 || 0;
+  const foiSorteado = s.ganhadores && s.ganhadores.length > 0;
+  const aberto = agora >= inicio && agora <= fim && !foiSorteado;
+  const aindaNao = agora < inicio;
+
+  // --- HERO ---
+  const heroEl = document.createElement('div');
+  heroEl.className = 'sorteio-hero';
+  heroEl.innerHTML = `
+    <div class="hero-emoji">${escHtml(s.emoji || '🎟️')}</div>
+    <div class="hero-tema">${escHtml(s.tema)}</div>
+    <div class="hero-nome">${escHtml(s.nome)}</div>
+    ${s.descricao ? `<div class="hero-desc">${escHtml(s.descricao)}</div>` : ''}
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-val">${participantes.length}</div>
+        <div class="stat-label">Inscritos</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val">${s.qtdGanhadores}</div>
+        <div class="stat-label">Ganhadores</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val">${new Date(fim).toLocaleDateString('pt-BR')}</div>
+        <div class="stat-label">Encerra em</div>
+      </div>
+    </div>`;
+  main.appendChild(heroEl);
+
+  // --- COUNTDOWN BAR ---
+  const cbEl = document.createElement('div');
+  cbEl.className = 'countdown-bar';
+  if (foiSorteado) {
+    cbEl.innerHTML = `<span class="countdown-label">Sorteio realizado</span><span class="status-badge badge-encerrado">Concluído</span>`;
+  } else if (aindaNao) {
+    cbEl.innerHTML = `<span class="countdown-label">Começa em</span><span class="countdown-timer" id="countdown-timer">--:--:--</span><span class="status-badge badge-ainda-nao">Em breve</span>`;
+    countdownInterval = setInterval(() => {
+      const t = document.getElementById('countdown-timer');
+      if (t) t.textContent = fmtCountdown(inicio - Date.now());
+    }, 1000);
+  } else if (aberto) {
+    cbEl.innerHTML = `<span class="countdown-label">Encerra em</span><span class="countdown-timer" id="countdown-timer">--:--:--</span><span class="status-badge badge-aberto">Aberto</span>`;
+    countdownInterval = setInterval(() => {
+      const t = document.getElementById('countdown-timer');
+      if (t) {
+        const remaining = fim - Date.now();
+        t.textContent = fmtCountdown(remaining);
+        if (remaining <= 0) { clearInterval(countdownInterval); carregarSorteio(); }
+      }
+    }, 1000);
+  } else {
+    cbEl.innerHTML = `<span class="countdown-label">Inscrições encerradas</span><span class="status-badge badge-encerrado">Encerrado</span>`;
+  }
+  main.appendChild(cbEl);
+
+  // --- GANHADORES ---
+  if (foiSorteado && s.ganhadores.length > 0) {
+    const gEl = document.createElement('div');
+    gEl.className = 'ganhadores-card';
+    gEl.innerHTML = `<div class="ganhadores-title">🏆 Ganhadores do Sorteio</div>` +
+      s.ganhadores.map((g, i) => `
+        <div class="ganhador-item">
+          <div class="ganhador-num">${i+1}</div>
+          <div>
+            <div class="ganhador-nome">${escHtml(g.nome)} ${escHtml(g.sobrenome)}</div>
+            ${g.opcoes ? `<div class="ganhador-opcao">Opção: ${escHtml(g.opcoes.join(', '))}</div>` : ''}
+          </div>
+        </div>`).join('');
+    main.appendChild(gEl);
+  }
+
+  // --- FORM DE INSCRIÇÃO ---
+  if (aberto) {
+    const formEl = document.createElement('div');
+    formEl.className = 'form-card';
+
+    let opcoesHtml = '';
+    if (s.opcoes && s.opcoes.length > 0) {
+      const tipo = s.multipla ? 'checkbox' : 'radio';
+      opcoesHtml = `
+        <div class="opcoes-titulo">${s.multipla ? 'Escolha suas opções' : 'Escolha uma opção'}</div>
+        <div class="opcoes-grid" id="opcoes-grid">
+          ${s.opcoes.map((op, i) => `
+            <label class="opcao-label" id="label-opcao-${i}">
+              <input type="${tipo}" name="opcao" value="${escHtml(op)}"
+                onchange="toggleOpcaoStyle(${i})">
+              <span class="opcao-text">${escHtml(op)}</span>
+            </label>`).join('')}
+        </div>`;
+    }
+
+    formEl.innerHTML = `
+      <div class="form-title">Faça sua inscrição</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nome</label>
+          <input type="text" id="f-nome" placeholder="Seu nome" autocomplete="given-name">
+          <div class="field-err" id="err-nome"></div>
+        </div>
+        <div class="form-group">
+          <label>Sobrenome</label>
+          <input type="text" id="f-sobrenome" placeholder="Seu sobrenome" autocomplete="family-name">
+          <div class="field-err" id="err-sobrenome"></div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group full">
+          <label>E-mail corporativo</label>
+          <input type="email" id="f-email" placeholder="seu.nome@etus.com.br" autocomplete="email">
+          <div class="field-err" id="err-email"></div>
+        </div>
+      </div>
+      ${opcoesHtml}
+      <button class="btn-submit" id="btn-inscrever">Confirmar inscrição</button>
+      <div style="margin-top: 12px; font-size: 12px; color: var(--muted); text-align: center;">
+        Aceito apenas e-mails com domínio @etus.com.br, @brius.com.br ou @bhaz.com.br.<br>
+        Cada colaborador pode participar uma única vez.
+      </div>`;
+
+    main.appendChild(formEl);
+
+    document.getElementById('btn-inscrever').addEventListener('click', () => inscrever(s));
+  } else if (aindaNao) {
+    const el = document.createElement('div');
+    el.className = 'state-box';
+    el.innerHTML = `
+      <div class="state-icon">⏰</div>
+      <div class="state-title">Ainda não aberto</div>
+      <div class="state-sub">As inscrições começam em<br><strong>${new Date(inicio).toLocaleString('pt-BR')}</strong></div>`;
+    main.appendChild(el);
+  } else if (!foiSorteado) {
+    const el = document.createElement('div');
+    el.className = 'state-box';
+    el.innerHTML = `
+      <div class="state-icon">🔒</div>
+      <div class="state-title">Inscrições encerradas</div>
+      <div class="state-sub">O período de inscrições terminou.<br>Aguarde o sorteio ser realizado pelo RH.</div>`;
+    main.appendChild(el);
+  }
+
+  // --- LISTA PÚBLICA DE PARTICIPANTES ---
+  const pEl = document.createElement('div');
+  pEl.className = 'participantes-card';
+  const ganh = s.ganhadores || [];
+  pEl.innerHTML = `
+    <div class="part-header">
+      <div class="part-title">Participantes</div>
+      <div class="part-count">${participantes.length} inscritos</div>
+    </div>
+    <div class="part-list">
+      ${participantes.length === 0
+        ? '<span style="font-size:13px;color:var(--muted);">Nenhum inscrito ainda. Seja o primeiro!</span>'
+        : participantes.map(p => {
+            const isG = ganh.some(g => g.email === p.email);
+            return `<div class="part-chip ${isG ? 'ganhador' : ''}">
+              ${isG ? '🏆 ' : ''}<span>${escHtml(p.nome)} ${escHtml(p.sobrenome[0])}.</span>
+            </div>`;
+          }).join('')}
+    </div>`;
+  main.appendChild(pEl);
+}
+
+// ---------- INSCREVER ----------
+async function inscrever(s) {
+  const nome = document.getElementById('f-nome').value.trim();
+  const sobrenome = document.getElementById('f-sobrenome').value.trim();
+  const email = document.getElementById('f-email').value.trim().toLowerCase();
+
+  let valid = true;
+
+  if (!nome) { document.getElementById('err-nome').textContent = 'Campo obrigatório.'; document.getElementById('f-nome').classList.add('error'); valid = false; }
+  else { document.getElementById('err-nome').textContent = ''; document.getElementById('f-nome').classList.remove('error'); }
+
+  if (!sobrenome) { document.getElementById('err-sobrenome').textContent = 'Campo obrigatório.'; document.getElementById('f-sobrenome').classList.add('error'); valid = false; }
+  else { document.getElementById('err-sobrenome').textContent = ''; document.getElementById('f-sobrenome').classList.remove('error'); }
+
+  const domValido = DOMINIOS.some(d => email.endsWith(d));
+  if (!email || !domValido) {
+    document.getElementById('err-email').textContent = 'Use um e-mail @etus.com.br, @brius.com.br ou @bhaz.com.br.';
+    document.getElementById('f-email').classList.add('error');
+    valid = false;
+  } else { document.getElementById('err-email').textContent = ''; document.getElementById('f-email').classList.remove('error'); }
+
+  if (!valid) return;
+
+  // Checar opcoes
+  let opcoesSelecionadas = [];
+  if (s.opcoes && s.opcoes.length > 0) {
+    const inputs = document.querySelectorAll('#opcoes-grid input:checked');
+    opcoesSelecionadas = [...inputs].map(i => i.value);
+    if (opcoesSelecionadas.length === 0) {
+      showToast('Selecione pelo menos uma opção.', 'error'); return;
+    }
+  }
+
+  // Checar horário atual (double-check)
+  const agora = Date.now();
+  const inicio = s.inicio?.toMillis?.() || s.inicio?.seconds * 1000 || 0;
+  const fim = s.fim?.toMillis?.() || s.fim?.seconds * 1000 || 0;
+  if (agora < inicio || agora > fim) {
+    showToast('Inscrições fora do período permitido.', 'error'); return;
+  }
+
+  // Checar duplicata
+  const emailId = emailParaId(email);
+  const partRef = doc(db, 'sorteios', sorteioId, 'participantes', emailId);
+  const existing = await getDoc(partRef);
+  if (existing.exists()) {
+    showToast('Este e-mail já está inscrito neste sorteio.', 'error'); return;
+  }
+
+  const btn = document.getElementById('btn-inscrever');
+  btn.disabled = true; btn.textContent = 'Inscrevendo...';
+
+  try {
+    const { setDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    await setDoc(partRef, {
+      nome, sobrenome, email,
+      opcoes: opcoesSelecionadas.length > 0 ? opcoesSelecionadas : null,
+      inscritoEm: serverTimestamp()
+    });
+
+    // Mostrar sucesso
+    const main = document.getElementById('main-content');
+    const formCard = document.querySelector('.form-card');
+    if (formCard) {
+      formCard.innerHTML = `
+        <div class="success-card" style="border:none;padding:0;">
+          <div class="success-icon">🎉</div>
+          <div class="success-title">Você está inscrito!</div>
+          <div class="success-sub">Sua participação foi confirmada com sucesso.<br>O resultado será divulgado após o sorteio.</div>
+          <div class="inscricao-box">
+            <strong>${nome} ${sobrenome}</strong><br>
+            ${email}
+            ${opcoesSelecionadas.length > 0 ? `<br><span style="color:var(--accent)">Opção: ${opcoesSelecionadas.join(', ')}</span>` : ''}
+          </div>
+        </div>`;
+    }
+    showToast('Inscrição confirmada! Boa sorte! 🍀', 'success');
+  } catch(e) {
+    showToast('Erro ao inscrever: ' + e.message, 'error');
+    btn.disabled = false; btn.textContent = 'Confirmar inscrição';
+  }
+}
+
+// toggle visual das opções
+window.toggleOpcaoStyle = function(i) {
+  const label = document.getElementById('label-opcao-' + i);
+  const input = label.querySelector('input');
+  if (input.type === 'radio') {
+    document.querySelectorAll('.opcao-label').forEach(l => l.classList.remove('selecionada'));
+  }
+  if (input.checked) label.classList.add('selecionada');
+  else label.classList.remove('selecionada');
+};
+</script>
+</body>
+</html>

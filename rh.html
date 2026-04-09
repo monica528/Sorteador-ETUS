@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RH · Painel de Sorteios</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1c1c27;
+    --border: rgba(255,255,255,0.08);
+    --accent: #7c5cfc;
+    --accent2: #c084fc;
+    --gold: #f59e0b;
+    --green: #10b981;
+    --red: #ef4444;
+    --text: #f0f0f8;
+    --muted: #6b6b85;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ---- LOGIN ---- */
+  #login-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at 60% 20%, rgba(124,92,252,0.15) 0%, transparent 60%);
+  }
+  .login-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 48px;
+    width: 380px;
+    text-align: center;
+  }
+  .login-logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    color: var(--muted);
+    margin-bottom: 32px;
+    text-transform: uppercase;
+  }
+  .login-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+  .login-sub { font-size: 14px; color: var(--muted); margin-bottom: 32px; }
+  .field { margin-bottom: 16px; text-align: left; }
+  .field label { font-size: 12px; font-weight: 500; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; display: block; margin-bottom: 6px; }
+  .field input {
+    width: 100%; padding: 12px 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-size: 15px;
+    font-family: inherit;
+    outline: none;
+    transition: border 0.2s;
+  }
+  .field input:focus { border-color: var(--accent); }
+  .btn-primary {
+    width: 100%; padding: 14px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 15px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    margin-top: 8px;
+  }
+  .btn-primary:hover { opacity: 0.88; }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+  .login-err { color: var(--red); font-size: 13px; margin-top: 12px; min-height: 20px; }
+  .participant-link {
+    margin-top: 20px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .participant-link a { color: var(--accent2); text-decoration: none; }
+  .participant-link a:hover { text-decoration: underline; }
+
+  /* ---- APP ---- */
+  #app { display: none; }
+  header {
+    padding: 16px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 1px;
+  }
+  .logo-text span { color: var(--accent); }
+  .header-right { display: flex; align-items: center; gap: 16px; }
+  .user-badge {
+    font-size: 13px; color: var(--muted);
+    background: var(--surface2);
+    padding: 6px 14px;
+    border-radius: 99px;
+    border: 1px solid var(--border);
+  }
+  .btn-sm {
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--muted);
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-sm:hover { border-color: var(--accent); color: var(--text); }
+
+  .main { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
+  .page-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 30px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+  .page-sub { color: var(--muted); font-size: 14px; margin-bottom: 36px; }
+
+  .tabs {
+    display: flex; gap: 4px;
+    background: var(--surface2);
+    border-radius: var(--radius);
+    padding: 4px;
+    margin-bottom: 32px;
+    width: fit-content;
+    border: 1px solid var(--border);
+  }
+  .tab {
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--muted);
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+  .tab.active { background: var(--accent); color: #fff; }
+
+  /* ---- FORM CARD ---- */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 24px;
+  }
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-title .icon { font-size: 20px; }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media(max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
+  .form-field { display: flex; flex-direction: column; gap: 6px; }
+  .form-field.full { grid-column: 1 / -1; }
+  .form-field label { font-size: 12px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+  .form-field input, .form-field textarea, .form-field select {
+    padding: 11px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border 0.2s;
+  }
+  .form-field input:focus, .form-field textarea:focus { border-color: var(--accent); }
+  .form-field textarea { resize: vertical; min-height: 80px; }
+  .form-field small { font-size: 11px; color: var(--muted); }
+
+  /* opcoes dinamicas */
+  .opcoes-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+  .opcao-item {
+    display: flex; gap: 10px; align-items: center;
+  }
+  .opcao-item input { flex: 1; }
+  .btn-remove {
+    width: 32px; height: 32px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--red);
+    cursor: pointer;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .btn-remove:hover { background: rgba(239,68,68,0.1); border-color: var(--red); }
+  .btn-add-opcao {
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    color: var(--muted);
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-add-opcao:hover { border-color: var(--accent); color: var(--accent); }
+
+  .btn-create {
+    margin-top: 8px;
+    padding: 14px 32px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 15px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .btn-create:hover { opacity: 0.85; }
+  .btn-create:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ---- LISTA SORTEIOS ---- */
+  .sorteios-grid { display: flex; flex-direction: column; gap: 16px; }
+  .sorteio-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .sorteio-card:hover { border-color: rgba(124,92,252,0.3); }
+  .sorteio-header {
+    padding: 24px 28px 20px;
+    display: flex; align-items: flex-start; gap: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sorteio-badge {
+    width: 44px; height: 44px;
+    background: rgba(124,92,252,0.15);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .sorteio-meta { flex: 1; }
+  .sorteio-nome {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .sorteio-tema { font-size: 13px; color: var(--muted); }
+  .status-pill {
+    padding: 4px 12px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+  }
+  .status-aberto { background: rgba(16,185,129,0.15); color: #10b981; }
+  .status-encerrado { background: rgba(107,107,133,0.15); color: var(--muted); }
+  .status-sorteado { background: rgba(245,158,11,0.15); color: var(--gold); }
+
+  .sorteio-body { padding: 20px 28px; }
+  .sorteio-info {
+    display: flex; gap: 24px; margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .info-item { font-size: 13px; color: var(--muted); }
+  .info-item strong { color: var(--text); font-weight: 500; display: block; font-size: 14px; }
+
+  .sorteio-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn-action {
+    padding: 8px 18px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+  }
+  .btn-action:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-action.danger { color: var(--red); }
+  .btn-action.danger:hover { border-color: var(--red); }
+  .btn-action.gold { color: var(--gold); }
+  .btn-action.gold:hover { border-color: var(--gold); background: rgba(245,158,11,0.08); }
+  .btn-action.green { color: var(--green); }
+  .btn-action.green:hover { border-color: var(--green); background: rgba(16,185,129,0.08); }
+
+  /* participantes inline */
+  .participantes-section { margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px; }
+  .participantes-title { font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+  .participantes-list {
+    display: flex; flex-wrap: wrap; gap: 8px;
+  }
+  .participante-chip {
+    padding: 5px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    font-size: 12px;
+    color: var(--text);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .participante-chip.ganhador {
+    background: rgba(245,158,11,0.12);
+    border-color: rgba(245,158,11,0.4);
+    color: var(--gold);
+    font-weight: 600;
+  }
+  .ganhador-icon { font-size: 13px; }
+
+  /* modal */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px;
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+  }
+  .modal-icon { font-size: 48px; margin-bottom: 16px; }
+  .modal h3 { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+  .modal p { font-size: 14px; color: var(--muted); margin-bottom: 24px; line-height: 1.6; }
+  .modal-actions { display: flex; gap: 12px; justify-content: center; }
+  .btn-modal-confirm {
+    padding: 12px 28px;
+    background: var(--gold);
+    color: #000;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .btn-modal-confirm:hover { opacity: 0.85; }
+  .btn-modal-cancel {
+    padding: 12px 28px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--muted);
+    font-size: 14px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-modal-cancel:hover { border-color: var(--accent); color: var(--text); }
+
+  .ganhadores-display {
+    background: rgba(245,158,11,0.08);
+    border: 1px solid rgba(245,158,11,0.3);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 8px;
+  }
+  .ganhadores-display .g-nome { font-size: 18px; font-weight: 700; color: var(--gold); margin-bottom: 2px; }
+  .ganhadores-display .g-email { font-size: 12px; color: var(--muted); }
+  .ganhadores-display .g-opcao { font-size: 12px; color: var(--accent2); margin-top: 4px; }
+
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    padding: 14px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 14px;
+    z-index: 9999;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s;
+    max-width: 320px;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { border-color: var(--green); color: var(--green); }
+  .toast.error { border-color: var(--red); color: var(--red); }
+
+  .empty-state {
+    text-align: center; padding: 60px 20px;
+    color: var(--muted);
+  }
+  .empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+  .empty-state p { font-size: 14px; }
+
+  .loading { text-align: center; padding: 40px; color: var(--muted); font-size: 14px; }
+
+  .copy-link {
+    display: flex; gap: 8px; align-items: center; margin-top: 12px;
+    padding: 10px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px; color: var(--muted);
+  }
+  .copy-link span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .btn-copy {
+    padding: 4px 10px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">RH · Gestão de Sorteios</div>
+    <div class="login-title">Acesso Administrativo</div>
+    <div class="login-sub">Exclusivo para equipe de Recursos Humanos</div>
+    <div class="field">
+      <label>E-mail corporativo</label>
+      <input type="email" id="login-email" placeholder="rh@etus.com.br" autocomplete="email">
+    </div>
+    <div class="field">
+      <label>Senha</label>
+      <input type="password" id="login-pass" placeholder="••••••••">
+    </div>
+    <button class="btn-primary" id="btn-login">Entrar no painel</button>
+    <div class="login-err" id="login-err"></div>
+    <div class="participant-link">
+      É participante? <a href="participante.html">Acesse a página de inscrição →</a>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header>
+    <div class="logo-text">SORTEIO<span>RH</span></div>
+    <div class="header-right">
+      <div class="user-badge" id="user-email-display"></div>
+      <button class="btn-sm" id="btn-logout">Sair</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <div class="page-title">Painel de Sorteios</div>
+    <div class="page-sub">Crie e gerencie sorteios para os colaboradores</div>
+
+    <div class="tabs">
+      <button class="tab active" id="tab-list" onclick="showTab('list')">Sorteios</button>
+      <button class="tab" id="tab-create" onclick="showTab('create')">+ Novo Sorteio</button>
+    </div>
+
+    <!-- TAB LISTA -->
+    <div id="tab-content-list">
+      <div id="sorteios-container" class="sorteios-grid">
+        <div class="loading">Carregando sorteios...</div>
+      </div>
+    </div>
+
+    <!-- TAB CRIAR -->
+    <div id="tab-content-create" style="display:none;">
+      <div class="card">
+        <div class="card-title"><span class="icon">🎟️</span> Dados do Sorteio</div>
+        <div class="form-grid">
+          <div class="form-field">
+            <label>Nome do Sorteio</label>
+            <input type="text" id="f-nome" placeholder="Ex: Show do Coldplay 2025">
+          </div>
+          <div class="form-field">
+            <label>Tema / Evento</label>
+            <input type="text" id="f-tema" placeholder="Ex: Ingressos para show">
+          </div>
+          <div class="form-field">
+            <label>Quantidade de ganhadores</label>
+            <input type="number" id="f-qtd" min="1" max="500" value="1">
+          </div>
+          <div class="form-field">
+            <label>Emoji / Ícone (opcional)</label>
+            <input type="text" id="f-emoji" placeholder="🎵" maxlength="4">
+          </div>
+          <div class="form-field full">
+            <label>Descrição</label>
+            <textarea id="f-desc" placeholder="Detalhes sobre o sorteio, regras, local do evento..."></textarea>
+          </div>
+          <div class="form-field">
+            <label>Início das inscrições</label>
+            <input type="datetime-local" id="f-inicio">
+          </div>
+          <div class="form-field">
+            <label>Encerramento das inscrições</label>
+            <input type="datetime-local" id="f-fim">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">☑️</span> Opções de Escolha</div>
+        <div style="font-size: 13px; color: var(--muted); margin-bottom: 16px;">
+          Se o sorteio tiver mais de uma opção (ex: setores, datas, categorias), adicione abaixo. O participante escolherá ao se inscrever.
+        </div>
+        <div class="opcoes-list" id="opcoes-list">
+          <div class="opcao-item">
+            <input type="text" placeholder="Opção 1 (ex: Pista, Cadeira, VIP...)">
+            <button class="btn-remove" onclick="removerOpcao(this)">✕</button>
+          </div>
+        </div>
+        <button class="btn-add-opcao" onclick="adicionarOpcao()">+ Adicionar opção</button>
+        <div style="margin-top: 12px;">
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); cursor: pointer;">
+            <input type="checkbox" id="f-multipla" style="width: auto;"> Permitir múltipla escolha
+          </label>
+        </div>
+      </div>
+
+      <button class="btn-create" id="btn-criar-sorteio" onclick="criarSorteio()">🎉 Criar Sorteio</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SORTEIO -->
+<div class="modal-overlay" id="modal-sortear">
+  <div class="modal">
+    <div class="modal-icon">🎲</div>
+    <h3>Realizar Sorteio</h3>
+    <p id="modal-sortear-txt"></p>
+    <div id="ganhadores-preview"></div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="fecharModal('modal-sortear')">Cancelar</button>
+      <button class="btn-modal-confirm" id="btn-confirmar-sorteio">Sortear agora!</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- FIREBASE SDK -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import {
+  getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged
+} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import {
+  getFirestore, collection, doc, addDoc, getDocs, updateDoc, deleteDoc,
+  onSnapshot, serverTimestamp, query, orderBy
+} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// =============================================
+// 🔥 CONFIGURAÇÃO FIREBASE — SUBSTITUA AQUI
+// =============================================
+const firebaseConfig = {
+  apiKey: "SUA_API_KEY",
+  authDomain: "SEU_PROJETO.firebaseapp.com",
+  projectId: "SEU_PROJETO_ID",
+  storageBucket: "SEU_PROJETO.appspot.com",
+  messagingSenderId: "SEU_SENDER_ID",
+  appId: "SEU_APP_ID"
+};
+// =============================================
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const DOMINIOS = ['@etus.com.br', '@brius.com.br', '@bhaz.com.br'];
+
+// ---------- AUTH ----------
+document.getElementById('btn-login').addEventListener('click', async () => {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  const err = document.getElementById('login-err');
+  err.textContent = '';
+
+  const domValido = DOMINIOS.some(d => email.endsWith(d));
+  if (!domValido) {
+    err.textContent = 'Use um e-mail corporativo (@etus, @brius ou @bhaz).';
+    return;
+  }
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch (e) {
+    err.textContent = e.code === 'auth/invalid-credential'
+      ? 'E-mail ou senha inválidos.' : 'Erro ao entrar. Tente novamente.';
+  }
+});
+
+document.getElementById('login-email').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-login').click(); });
+document.getElementById('login-pass').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-login').click(); });
+
+document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
+
+onAuthStateChanged(auth, user => {
+  if (user) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('user-email-display').textContent = user.email;
+    iniciarApp();
+  } else {
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+  }
+});
+
+// ---------- APP ----------
+let unsubscribeSorteios = null;
+let sorteioParaSortear = null;
+
+function iniciarApp() {
+  const q = query(collection(db, 'sorteios'), orderBy('criadoEm', 'desc'));
+  unsubscribeSorteios = onSnapshot(q, async snap => {
+    const container = document.getElementById('sorteios-container');
+    if (snap.empty) {
+      container.innerHTML = '<div class="empty-state"><div class="empty-icon">🎟️</div><p>Nenhum sorteio criado ainda.<br>Clique em "Novo Sorteio" para começar.</p></div>';
+      return;
+    }
+    container.innerHTML = '';
+    for (const docSnap of snap.docs) {
+      const s = docSnap.data();
+      const el = await renderSorteioCard(docSnap.id, s);
+      container.appendChild(el);
+    }
+  });
+}
+
+async function renderSorteioCard(id, s) {
+  const div = document.createElement('div');
+  div.className = 'sorteio-card';
+  div.id = 'sc-' + id;
+
+  const agora = Date.now();
+  const inicio = s.inicio?.toMillis?.() || 0;
+  const fim = s.fim?.toMillis?.() || 0;
+  let status = 'encerrado';
+  if (s.ganhadores && s.ganhadores.length > 0) status = 'sorteado';
+  else if (agora >= inicio && agora <= fim) status = 'aberto';
+  else if (agora < inicio) status = 'encerrado';
+
+  const statusLabel = { aberto: 'Aberto', encerrado: 'Encerrado', sorteado: 'Sorteado' }[status];
+  const statusClass = 'status-' + status;
+
+  const participantesSnap = await getDocs(collection(db, 'sorteios', id, 'participantes'));
+  const participantes = participantesSnap.docs.map(d => d.data());
+  const total = participantes.length;
+  const ganhadores = s.ganhadores || [];
+
+  const fmtDate = ts => ts?.toDate ? ts.toDate().toLocaleString('pt-BR') : '—';
+
+  let opcoesTxt = (s.opcoes && s.opcoes.length > 0) ? s.opcoes.join(', ') : '—';
+  let linkPart = `${window.location.origin}/participante.html?sorteio=${id}`;
+
+  div.innerHTML = `
+    <div class="sorteio-header">
+      <div class="sorteio-badge">${s.emoji || '🎟️'}</div>
+      <div class="sorteio-meta">
+        <div class="sorteio-nome">${escHtml(s.nome)}</div>
+        <div class="sorteio-tema">${escHtml(s.tema)}</div>
+      </div>
+      <div class="status-pill ${statusClass}">${statusLabel}</div>
+    </div>
+    <div class="sorteio-body">
+      <div class="sorteio-info">
+        <div class="info-item"><strong>${total}</strong>Inscritos</div>
+        <div class="info-item"><strong>${s.qtdGanhadores}</strong>Ganhadores</div>
+        <div class="info-item"><strong>${fmtDate(s.inicio)}</strong>Início</div>
+        <div class="info-item"><strong>${fmtDate(s.fim)}</strong>Encerramento</div>
+        <div class="info-item"><strong>${opcoesTxt}</strong>Opções</div>
+      </div>
+      ${s.descricao ? `<div style="font-size:13px;color:var(--muted);margin-bottom:16px;">${escHtml(s.descricao)}</div>` : ''}
+      <div class="copy-link">
+        <span>${linkPart}</span>
+        <button class="btn-copy" onclick="copiarLink('${linkPart}')">Copiar</button>
+      </div>
+      <div class="sorteio-actions" style="margin-top:16px;">
+        ${status === 'aberto' || status === 'encerrado' && total > 0 && !s.ganhadores?.length
+          ? `<button class="btn-action gold" onclick="abrirModalSortear('${id}', ${s.qtdGanhadores})">🎲 Realizar sorteio</button>` : ''}
+        ${status === 'aberto'
+          ? `<button class="btn-action danger" onclick="encerrarSorteio('${id}')">⏹ Encerrar inscrições</button>` : ''}
+        <button class="btn-action danger" onclick="deletarSorteio('${id}')">🗑 Deletar</button>
+      </div>
+
+      <div class="participantes-section">
+        <div class="participantes-title">Participantes (${total})</div>
+        <div class="participantes-list">
+          ${participantes.length === 0
+            ? '<span style="font-size:13px;color:var(--muted);">Nenhum inscrito ainda.</span>'
+            : participantes.map(p => {
+                const isGanhador = ganhadores.some(g => g.email === p.email);
+                return `<div class="participante-chip ${isGanhador ? 'ganhador' : ''}">
+                  ${isGanhador ? '<span class="ganhador-icon">🏆</span>' : ''}
+                  ${escHtml(p.nome)} ${escHtml(p.sobrenome)}
+                  ${p.opcoes ? `<span style="color:var(--muted);font-size:11px;">(${escHtml(p.opcoes.join(', '))})</span>` : ''}
+                </div>`;
+              }).join('')}
+        </div>
+      </div>
+
+      ${ganhadores.length > 0 ? `
+        <div class="participantes-section">
+          <div class="participantes-title">🏆 Ganhadores</div>
+          ${ganhadores.map(g => `
+            <div class="ganhadores-display">
+              <div class="g-nome">🏆 ${escHtml(g.nome)} ${escHtml(g.sobrenome)}</div>
+              <div class="g-email">${escHtml(g.email)}</div>
+              ${g.opcoes ? `<div class="g-opcao">Opção: ${escHtml(g.opcoes.join(', '))}</div>` : ''}
+            </div>`).join('')}
+        </div>` : ''}
+    </div>`;
+  return div;
+}
+
+// ---------- CRIAR SORTEIO ----------
+window.criarSorteio = async function() {
+  const nome = document.getElementById('f-nome').value.trim();
+  const tema = document.getElementById('f-tema').value.trim();
+  const qtd = parseInt(document.getElementById('f-qtd').value) || 1;
+  const emoji = document.getElementById('f-emoji').value.trim() || '🎟️';
+  const desc = document.getElementById('f-desc').value.trim();
+  const inicio = document.getElementById('f-inicio').value;
+  const fim = document.getElementById('f-fim').value;
+  const multipla = document.getElementById('f-multipla').checked;
+
+  if (!nome || !tema || !inicio || !fim) {
+    showToast('Preencha todos os campos obrigatórios.', 'error'); return;
+  }
+  if (new Date(inicio) >= new Date(fim)) {
+    showToast('A data de encerramento deve ser após o início.', 'error'); return;
+  }
+
+  const opcoesInputs = document.querySelectorAll('#opcoes-list .opcao-item input');
+  const opcoes = [...opcoesInputs].map(i => i.value.trim()).filter(Boolean);
+
+  const btn = document.getElementById('btn-criar-sorteio');
+  btn.disabled = true; btn.textContent = 'Criando...';
+
+  try {
+    await addDoc(collection(db, 'sorteios'), {
+      nome, tema, qtdGanhadores: qtd, emoji, descricao: desc,
+      inicio: new Date(inicio), fim: new Date(fim),
+      opcoes, multipla, ganhadores: [],
+      criadoEm: serverTimestamp(),
+      criadoPor: auth.currentUser.email
+    });
+    showToast('Sorteio criado com sucesso!', 'success');
+    // reset form
+    ['f-nome','f-tema','f-desc','f-emoji'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('f-qtd').value = 1;
+    document.getElementById('f-inicio').value = '';
+    document.getElementById('f-fim').value = '';
+    document.getElementById('f-multipla').checked = false;
+    document.getElementById('opcoes-list').innerHTML = '<div class="opcao-item"><input type="text" placeholder="Opção 1"><button class="btn-remove" onclick="removerOpcao(this)">✕</button></div>';
+    showTab('list');
+  } catch(e) {
+    showToast('Erro ao criar sorteio: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = '🎉 Criar Sorteio';
+  }
+};
+
+// ---------- SORTEAR ----------
+window.abrirModalSortear = async function(id, qtd) {
+  sorteioParaSortear = id;
+  const snap = await getDocs(collection(db, 'sorteios', id, 'participantes'));
+  const total = snap.size;
+  document.getElementById('modal-sortear-txt').textContent =
+    `${total} participante(s) inscritos. Serão sorteados ${qtd} ganhador(es). Esta ação não pode ser desfeita.`;
+  document.getElementById('ganhadores-preview').innerHTML = '';
+  document.getElementById('modal-sortear').classList.add('open');
+
+  document.getElementById('btn-confirmar-sorteio').onclick = async () => {
+    const participantes = snap.docs.map(d => d.data());
+    if (participantes.length === 0) { showToast('Nenhum participante.', 'error'); return; }
+    const embaralhados = participantes.sort(() => Math.random() - 0.5);
+    const escolhidos = embaralhados.slice(0, Math.min(qtd, participantes.length));
+    await updateDoc(doc(db, 'sorteios', id), { ganhadores: escolhidos });
+    document.getElementById('modal-sortear').classList.remove('open');
+    showToast(`✨ ${escolhidos.length} ganhador(es) sorteados!`, 'success');
+  };
+};
+
+window.encerrarSorteio = async function(id) {
+  if (!confirm('Encerrar inscrições agora?')) return;
+  await updateDoc(doc(db, 'sorteios', id), { fim: new Date() });
+  showToast('Inscrições encerradas.', 'success');
+};
+
+window.deletarSorteio = async function(id) {
+  if (!confirm('Deletar este sorteio permanentemente?')) return;
+  const partSnap = await getDocs(collection(db, 'sorteios', id, 'participantes'));
+  for (const p of partSnap.docs) await deleteDoc(p.ref);
+  await deleteDoc(doc(db, 'sorteios', id));
+  showToast('Sorteio deletado.', 'success');
+};
+
+// ---------- UTILS ----------
+window.adicionarOpcao = function() {
+  const list = document.getElementById('opcoes-list');
+  const n = list.children.length + 1;
+  const div = document.createElement('div');
+  div.className = 'opcao-item';
+  div.innerHTML = `<input type="text" placeholder="Opção ${n}"><button class="btn-remove" onclick="removerOpcao(this)">✕</button>`;
+  list.appendChild(div);
+};
+
+window.removerOpcao = function(btn) {
+  const list = document.getElementById('opcoes-list');
+  if (list.children.length > 1) btn.closest('.opcao-item').remove();
+};
+
+window.showTab = function(tab) {
+  document.getElementById('tab-content-list').style.display = tab === 'list' ? '' : 'none';
+  document.getElementById('tab-content-create').style.display = tab === 'create' ? '' : 'none';
+  document.getElementById('tab-list').classList.toggle('active', tab === 'list');
+  document.getElementById('tab-create').classList.toggle('active', tab === 'create');
+};
+
+window.fecharModal = function(id) {
+  document.getElementById(id).classList.remove('open');
+};
+
+window.copiarLink = function(link) {
+  navigator.clipboard.writeText(link);
+  showToast('Link copiado!', 'success');
+};
+
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.className = 'toast', 3500);
+}
+
+function escHtml(str = '') {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
