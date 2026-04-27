@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #151514;
+  --color-foreground: #fafafa;
+  --color-card: #1c1c1a;
+  --color-card-foreground: #fafafa;
+  --color-primary: #066e3e;
+  --color-primary-foreground: #ffffff;
+  --color-muted: #27272a;
+  --color-muted-foreground: #a1a1aa;
+  --color-border: #27272a;
+  --color-input: #27272a;
+  --color-ring: #066e3e;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+}
+
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-display: swap;
+  src: url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap');
+}
+
+body {
+  margin: 0;
+  font-family: 'Space Grotesk', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
