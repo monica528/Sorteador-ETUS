@@ -13,6 +13,7 @@ export default function App() {
   const [winners, setWinners] = useState([]);
   const [history, setHistory] = useState([]);
   const [spinning, setSpinning] = useState(false);
+  const [prize, setPrize] = useState('');
 
   const list = useMemo(
     () => names.split(/\n|,/).map((v) => v.trim()).filter(Boolean),
@@ -31,7 +32,7 @@ export default function App() {
       }
       setWinners(result);
       setHistory((h) => [
-        { date: new Date().toLocaleString('pt-BR'), winners: result },
+        { date: new Date().toLocaleString('pt-BR'), winners: result, prize: prize || 'Sorteio' },
         ...h,
       ]);
       setSpinning(false);
@@ -55,8 +56,9 @@ export default function App() {
   }
 
   function download() {
+    const header = prize ? `SORTEIO: ${prize}\n\nGANHADORES\n\n` : 'GANHADORES\n\n';
     const text =
-      'GANHADORES\n\n' +
+      header +
       winners.map((w, i) => `${i + 1}. ${w}`).join('\n');
     const blob = new Blob([text], { type: 'text/plain' });
     const a = document.createElement('a');
@@ -85,6 +87,18 @@ export default function App() {
             <p className="text-sm text-zinc-300">
               Sistema premium para sorteio de ingressos e campanhas internas
             </p>
+
+            <div>
+              <label className="text-sm text-zinc-300">
+                O que será sorteado?
+              </label>
+              <Input
+                type="text"
+                placeholder="Ex: Ingressos Cinema, Kit Natal, Vale-presente..."
+                value={prize}
+                onChange={(e) => setPrize(e.target.value)}
+              />
+            </div>
 
             <input
               type="file"
@@ -140,6 +154,9 @@ export default function App() {
             <h2 className="text-2xl font-semibold flex items-center gap-2 text-white">
               <Trophy className="w-5 h-5" /> Ganhadores
             </h2>
+            {prize && (
+              <p className="text-sm text-zinc-300 mt-1">Prêmio: {prize}</p>
+            )}
             <div className="mt-4 space-y-2 max-h-[600px] overflow-auto">
               {spinning && (
                 <div className="p-4 rounded-2xl text-center animate-pulse bg-yellow-100 text-yellow-900">
@@ -176,7 +193,14 @@ export default function App() {
               ) : (
                 history.map((item, i) => (
                   <div key={i} className="p-3 rounded-xl bg-zinc-100 text-zinc-900">
-                    <strong>{item.date}</strong>
+                    <div className="flex justify-between items-center">
+                      <strong>{item.date}</strong>
+                      {item.prize && (
+                        <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
+                          {item.prize}
+                        </span>
+                      )}
+                    </div>
                     <div className="text-sm mt-1">
                       {item.winners.join(', ')}
                     </div>
