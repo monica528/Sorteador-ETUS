@@ -4,7 +4,12 @@ import { auth } from './firebase';
 
 const AuthContext = createContext(null);
 
-const RH_EMAILS = ['rh@etus.com.br'];
+const RH_EMAILS = [
+  'rh@etus.com.br',
+  'monica@etus.com.br',
+  'felipe.moreira@etus.com.br',
+  'vanessa.teixeira@etus.com.br',
+];
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
