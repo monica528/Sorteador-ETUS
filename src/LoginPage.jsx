@@ -1,24 +1,16 @@
 import { useState } from 'react';
 import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithPopup,
-  updateProfile,
 } from 'firebase/auth';
 import { auth } from './firebase';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { LogIn, UserPlus } from 'lucide-react';
 
 const googleProvider = new GoogleAuthProvider();
+const ALLOWED_DOMAINS = ['etus.com.br', 'bhaz.com.br'];
 
 export default function LoginPage() {
-  const [isRegister, setIsRegister] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -26,41 +18,19 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      await signInWithPopup(auth, googleProvider);
+      const result = await signInWithPopup(auth, googleProvider);
+      const email = result.user.email || '';
+      const domain = email.split('@')[1]?.toLowerCase();
+      if (!ALLOWED_DOMAINS.includes(domain)) {
+        await auth.signOut();
+        setError(
+          `Acesso permitido apenas para emails @etus.com.br e @bhaz.com.br. Você tentou com: ${email}`,
+        );
+      }
     } catch (err) {
       if (err.code !== 'auth/popup-closed-by-user') {
         setError(`Erro ao entrar com Google: ${err.message}`);
       }
-    }
-    setLoading(false);
-  }
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-    try {
-      if (isRegister) {
-        if (!name.trim()) {
-          setError('Por favor, informe seu nome.');
-          setLoading(false);
-          return;
-        }
-        const cred = await createUserWithEmailAndPassword(auth, email, password);
-        await updateProfile(cred.user, { displayName: name.trim() });
-      } else {
-        await signInWithEmailAndPassword(auth, email, password);
-      }
-    } catch (err) {
-      const messages = {
-        'auth/email-already-in-use': 'Este email já está cadastrado.',
-        'auth/invalid-email': 'Email inválido.',
-        'auth/weak-password': 'A senha deve ter pelo menos 6 caracteres.',
-        'auth/invalid-credential': 'Email ou senha incorretos.',
-        'auth/user-not-found': 'Usuário não encontrado.',
-        'auth/wrong-password': 'Senha incorreta.',
-      };
-      setError(messages[err.code] || `Erro: ${err.message}`);
     }
     setLoading(false);
   }
@@ -78,7 +48,7 @@ export default function LoginPage() {
           <div className="text-center">
             <h1 className="text-3xl font-bold text-white">🎬 Sorteio Premium</h1>
             <p className="text-sm text-zinc-300 mt-2">
-              {isRegister ? 'Crie sua conta para participar' : 'Faça login para continuar'}
+              Faça login com sua conta Google corporativa
             </p>
           </div>
 
@@ -113,74 +83,12 @@ export default function LoginPage() {
                 fill="#EA4335"
               />
             </svg>
-            Entrar com Google
+            {loading ? 'Entrando...' : 'Entrar com Google'}
           </Button>
 
-          <div className="flex items-center gap-3">
-            <div className="flex-1 h-px bg-zinc-700" />
-            <span className="text-xs text-zinc-500">ou</span>
-            <div className="flex-1 h-px bg-zinc-700" />
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {isRegister && (
-              <div>
-                <label className="text-sm text-zinc-300">Seu nome completo</label>
-                <Input
-                  type="text"
-                  placeholder="Ex: Maria Silva"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-              </div>
-            )}
-
-            <div>
-              <label className="text-sm text-zinc-300">Email</label>
-              <Input
-                type="email"
-                placeholder="seu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="text-sm text-zinc-300">Senha</label>
-              <Input
-                type="password"
-                placeholder="Mínimo 6 caracteres"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            <Button
-              type="submit"
-              className="rounded-2xl w-full"
-              disabled={loading}
-            >
-              {isRegister ? (
-                <><UserPlus className="w-4 h-4 mr-2" /> Cadastrar</>
-              ) : (
-                <><LogIn className="w-4 h-4 mr-2" /> Entrar</>
-              )}
-            </Button>
-          </form>
-
-          <div className="text-center">
-            <button
-              type="button"
-              onClick={() => { setIsRegister(!isRegister); setError(''); }}
-              className="text-sm text-emerald-400 hover:text-emerald-300 underline"
-            >
-              {isRegister
-                ? 'Já tem conta? Faça login'
-                : 'Não tem conta? Cadastre-se'}
-            </button>
-          </div>
+          <p className="text-xs text-zinc-500 text-center">
+            Acesso restrito para emails @etus.com.br e @bhaz.com.br
+          </p>
         </CardContent>
       </Card>
     </div>
