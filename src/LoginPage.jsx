@@ -4,6 +4,7 @@ import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
   updateProfile,
 } from 'firebase/auth';
 import { auth } from './firebase';
@@ -28,7 +29,14 @@ export default function LoginPage() {
     try {
       await signInWithPopup(auth, googleProvider);
     } catch (err) {
-      if (err.code !== 'auth/popup-closed-by-user') {
+      if (err.code === 'auth/unauthorized-domain' || err.code === 'auth/popup-blocked') {
+        try {
+          await signInWithRedirect(auth, googleProvider);
+          return;
+        } catch (redirectErr) {
+          setError(`Erro ao entrar com Google: ${redirectErr.message}`);
+        }
+      } else if (err.code !== 'auth/popup-closed-by-user') {
         setError(`Erro ao entrar com Google: ${err.message}`);
       }
     }
