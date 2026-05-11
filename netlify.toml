@@ -3,12 +3,6 @@
   publish = "dist"
 
 [[redirects]]
-  from = "/__/auth/*"
-  to = "https://sorteador-etus.firebaseapp.com/__/auth/:splat"
-  status = 200
-  force = true
-
-[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
