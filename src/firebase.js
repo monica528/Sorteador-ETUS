@@ -4,7 +4,7 @@ import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: "AIzaSyCZN7q9N4OHKoz4PzkJO75YAlQmxJjHNEw",
-  authDomain: "transcendent-dolphin-1d34ae.netlify.app",
+  authDomain: "sorteador-etus.firebaseapp.com",
   projectId: "sorteador-etus",
   storageBucket: "sorteador-etus.firebasestorage.app",
   messagingSenderId: "312597522110",
