@@ -1,85 +1,74 @@
 import { useEffect, useState } from 'react';
-import { collection, doc, setDoc, query, where, onSnapshot } from 'firebase/firestore';
+import {
+  collection, doc, setDoc, onSnapshot, deleteDoc,
+} from 'firebase/firestore';
 import { db } from './firebase';
 import { useAuth } from './AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { LogOut, CheckCircle, Clock, Trophy } from 'lucide-react';
+import { LogOut, CheckCircle, Calendar, Clock, Users, Trophy } from 'lucide-react';
 
 export default function ParticipantPage() {
   const { user, logout } = useAuth();
-  const [name, setName] = useState(user?.displayName || '');
-  const [registered, setRegistered] = useState(false);
+  const [raffles, setRaffles] = useState([]);
+  const [finishedRaffles, setFinishedRaffles] = useState([]);
+  const [allParticipants, setAllParticipants] = useState({});
+  const [myJoined, setMyJoined] = useState({});
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [activeDraw, setActiveDraw] = useState(null);
-  const [myResults, setMyResults] = useState([]);
 
+  // Load active and finished raffles
   useEffect(() => {
-    if (!user) return;
-    const unsub = onSnapshot(
-      doc(db, 'participants', user.uid),
-      (snap) => {
-        if (snap.exists()) {
-          setRegistered(true);
-          setName(snap.data().name);
-        }
-        setLoading(false);
-      },
-    );
-    return unsub;
-  }, [user]);
-
-  useEffect(() => {
-    const unsub = onSnapshot(
-      query(collection(db, 'draws'), where('status', '==', 'active')),
-      (snap) => {
-        if (!snap.empty) {
-          const d = snap.docs[0];
-          setActiveDraw({ id: d.id, ...d.data() });
-        } else {
-          setActiveDraw(null);
-        }
-      },
-    );
+    const unsub = onSnapshot(collection(db, 'raffles'), (snap) => {
+      const all = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      setRaffles(all.filter((r) => r.status === 'active'));
+      setFinishedRaffles(all.filter((r) => r.status === 'finished'));
+      setLoading(false);
+    });
     return unsub;
   }, []);
 
+  // Load all participants grouped by raffle
   useEffect(() => {
-    if (!user) return;
-    const unsub = onSnapshot(
-      query(collection(db, 'draws'), where('status', '==', 'finished')),
-      (snap) => {
-        const results = [];
-        snap.docs.forEach((d) => {
-          const data = d.data();
-          if (data.winners && data.winners.some((w) => w.uid === user.uid)) {
-            results.push({ id: d.id, ...data });
-          }
-        });
-        setMyResults(results);
-      },
-    );
+    const unsub = onSnapshot(collection(db, 'raffle_participants'), (snap) => {
+      const byRaffle = {};
+      const joined = {};
+      snap.docs.forEach((d) => {
+        const data = d.data();
+        if (!byRaffle[data.raffleId]) byRaffle[data.raffleId] = [];
+        byRaffle[data.raffleId].push({ id: d.id, ...data });
+        if (data.uid === user?.uid) {
+          joined[data.raffleId] = d.id;
+        }
+      });
+      setAllParticipants(byRaffle);
+      setMyJoined(joined);
+    });
     return unsub;
   }, [user]);
 
-  async function handleRegister(e) {
-    e.preventDefault();
-    if (!name.trim()) return;
-    setSaving(true);
-    await setDoc(doc(db, 'participants', user.uid), {
-      name: name.trim(),
+  async function joinRaffle(raffleId) {
+    if (!user) return;
+    const participantId = `${raffleId}_${user.uid}`;
+    await setDoc(doc(db, 'raffle_participants', participantId), {
+      raffleId,
+      name: user.displayName || user.email.split('@')[0],
       email: user.email,
       uid: user.uid,
-      registeredAt: new Date().toISOString(),
+      joinedAt: new Date().toISOString(),
     });
-    setSaving(false);
+  }
+
+  async function leaveRaffle(raffleId) {
+    const participantId = `${raffleId}_${user.uid}`;
+    await deleteDoc(doc(db, 'raffle_participants', participantId));
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#151514,#066e3e,#151514)' }}>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: 'linear-gradient(135deg,#151514,#066e3e,#151514)' }}
+      >
         <p className="text-white text-lg animate-pulse">Carregando...</p>
       </div>
     );
@@ -93,7 +82,7 @@ export default function ParticipantPage() {
         fontFamily: 'Space Grotesk, sans-serif',
       }}
     >
-      <div className="max-w-2xl mx-auto space-y-6">
+      <div className="max-w-3xl mx-auto space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold text-white">🎬 Sorteio Premium</h1>
           <Button variant="outline" className="rounded-2xl" onClick={logout}>
@@ -101,72 +90,147 @@ export default function ParticipantPage() {
           </Button>
         </div>
 
-        <Card className="rounded-2xl shadow-2xl">
-          <CardContent className="p-6 space-y-4">
-            <p className="text-sm text-zinc-300">
-              Logado como: <strong className="text-white">{user.email}</strong>
-            </p>
+        <p className="text-sm text-zinc-300">
+          Logado como: <strong className="text-white">{user.email}</strong>
+        </p>
 
-            {registered ? (
-              <div className="p-4 rounded-xl bg-emerald-900/30 border border-emerald-700 text-emerald-200 flex items-center gap-3">
-                <CheckCircle className="w-5 h-5" />
-                <div>
-                  <p className="font-semibold">Você está participando!</p>
-                  <p className="text-sm">Nome: <strong>{name}</strong></p>
-                </div>
-              </div>
-            ) : (
-              <form onSubmit={handleRegister} className="space-y-4">
-                <div>
-                  <label className="text-sm text-zinc-300">
-                    Confirme seu nome para participar do sorteio
-                  </label>
-                  <Input
-                    type="text"
-                    placeholder="Seu nome completo"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                  />
-                </div>
-                <Button type="submit" className="rounded-2xl w-full" disabled={saving}>
-                  {saving ? 'Salvando...' : 'Participar do Sorteio'}
-                </Button>
-              </form>
-            )}
-          </CardContent>
-        </Card>
+        {/* Active Raffles */}
+        <h2 className="text-xl font-semibold text-white">Sorteios Ativos</h2>
 
-        {activeDraw && (
-          <Card className="rounded-2xl shadow-2xl border-2 border-yellow-500/50">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3 text-yellow-200">
-                <Clock className="w-5 h-5 animate-pulse" />
-                <div>
-                  <p className="font-semibold">Sorteio em andamento!</p>
-                  {activeDraw.prize && (
-                    <p className="text-sm">Prêmio: <strong>{activeDraw.prize}</strong></p>
-                  )}
-                </div>
-              </div>
+        {raffles.length === 0 ? (
+          <Card className="rounded-2xl shadow-2xl">
+            <CardContent className="p-6 text-center">
+              <p className="text-zinc-400">Nenhum sorteio ativo no momento.</p>
+              <p className="text-zinc-500 text-sm mt-1">Aguarde o RH criar um novo sorteio.</p>
             </CardContent>
           </Card>
+        ) : (
+          raffles.map((raffle) => {
+            const participants = allParticipants[raffle.id] || [];
+            const hasJoined = raffle.id in myJoined;
+
+            return (
+              <Card key={raffle.id} className="rounded-2xl shadow-2xl">
+                <CardContent className="p-6 space-y-4">
+                  <div className="flex justify-between items-start flex-wrap gap-3">
+                    <div>
+                      <h3 className="text-xl font-semibold text-white">{raffle.prize}</h3>
+                      <div className="flex items-center gap-4 mt-2 text-sm text-zinc-300">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" /> {raffle.date}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-4 h-4" /> {raffle.time}
+                        </span>
+                      </div>
+                    </div>
+
+                    {hasJoined ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-emerald-400 flex items-center gap-1 text-sm">
+                          <CheckCircle className="w-4 h-4" /> Participando
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="rounded-2xl text-red-400 border-red-400 hover:bg-red-900/20"
+                          onClick={() => leaveRaffle(raffle.id)}
+                        >
+                          Sair
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        className="rounded-2xl"
+                        onClick={() => joinRaffle(raffle.id)}
+                      >
+                        Participar
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Participants list */}
+                  <div className="border-t border-zinc-700 pt-3">
+                    <h4 className="text-white font-medium flex items-center gap-2 text-sm">
+                      <Users className="w-4 h-4" /> Participantes ({participants.length})
+                    </h4>
+                    {participants.length === 0 ? (
+                      <p className="text-zinc-500 text-sm mt-2">
+                        Nenhum participante ainda. Seja o primeiro!
+                      </p>
+                    ) : (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {participants.map((p) => (
+                          <span
+                            key={p.id}
+                            className={`px-3 py-1 rounded-full text-sm ${
+                              p.uid === user.uid
+                                ? 'bg-emerald-900/50 text-emerald-200 border border-emerald-700'
+                                : 'bg-zinc-800 text-zinc-300'
+                            }`}
+                          >
+                            {p.name}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })
         )}
 
-        {myResults.length > 0 && (
-          <Card className="rounded-2xl shadow-2xl">
-            <CardContent className="p-6 space-y-3">
-              <h2 className="text-xl font-semibold text-white flex items-center gap-2">
-                <Trophy className="w-5 h-5" /> Você ganhou!
-              </h2>
-              {myResults.map((draw) => (
-                <div key={draw.id} className="p-3 rounded-xl bg-yellow-100 text-yellow-900">
-                  <strong>{draw.prize || 'Sorteio'}</strong>
-                  <span className="text-sm ml-2">— {draw.finishedAt}</span>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+        {/* Finished Raffles with Results */}
+        {finishedRaffles.length > 0 && (
+          <>
+            <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+              <Trophy className="w-5 h-5" /> Resultados
+            </h2>
+            {finishedRaffles.map((raffle) => {
+              const isWinner = raffle.winners?.some((w) => w.uid === user.uid);
+              return (
+                <Card
+                  key={raffle.id}
+                  className={`rounded-2xl shadow-2xl ${
+                    isWinner ? 'border-2 border-yellow-500/50' : ''
+                  }`}
+                >
+                  <CardContent className="p-6 space-y-3">
+                    <div className="flex justify-between items-start flex-wrap gap-2">
+                      <div>
+                        <h3 className="text-lg font-semibold text-white">{raffle.prize}</h3>
+                        <p className="text-sm text-zinc-400">
+                          {raffle.date} às {raffle.time} — sorteado em {raffle.finishedAt}
+                        </p>
+                      </div>
+                      {isWinner && (
+                        <span className="px-3 py-1 rounded-full bg-yellow-100 text-yellow-900 text-sm font-bold">
+                          🏆 Você ganhou!
+                        </span>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-sm text-zinc-300 font-medium">Ganhadores:</p>
+                      <div className="mt-1 flex flex-wrap gap-2">
+                        {raffle.winnerNames?.map((name, i) => (
+                          <span
+                            key={i}
+                            className="px-3 py-1 rounded-full bg-emerald-900/50 text-emerald-200 text-sm"
+                          >
+                            #{i + 1} {name}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-xs text-zinc-500">
+                      {raffle.participantCount} participante(s)
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </>
         )}
       </div>
     </div>
