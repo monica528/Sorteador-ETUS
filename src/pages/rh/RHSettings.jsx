@@ -8,7 +8,6 @@ import { Shield, Clock, User, FileText } from 'lucide-react';
 const RH_EMAILS = [
   'rh@etus.com.br',
   'monica@etus.com.br',
-  'felipe.moreira@etus.com.br',
   'vanessa.teixeira@etus.com.br',
 ];
 

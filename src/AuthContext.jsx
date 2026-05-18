@@ -7,7 +7,6 @@ const AuthContext = createContext(null);
 const RH_EMAILS = [
   'rh@etus.com.br',
   'monica@etus.com.br',
-  'felipe.moreira@etus.com.br',
   'vanessa.teixeira@etus.com.br',
 ];
 
@@ -17,14 +16,10 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
+    const unsub = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
         setUser(firebaseUser);
-        if (RH_EMAILS.includes(firebaseUser.email.toLowerCase())) {
-          setRole('rh');
-        } else {
-          setRole('participante');
-        }
+        setRole(RH_EMAILS.includes(firebaseUser.email) ? 'rh' : 'participante');
       } else {
         setUser(null);
         setRole(null);
@@ -35,7 +30,10 @@ export function AuthProvider({ children }) {
   }, []);
 
   function logout() {
-    return signOut(auth);
+    return signOut(auth).then(() => {
+      setUser(null);
+      setRole(null);
+    });
   }
 
   return (
