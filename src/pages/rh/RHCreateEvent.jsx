@@ -59,10 +59,14 @@ export default function RHCreateEvent() {
       if (imageFile) {
         try {
           const imageRef = ref(storage, `events/${Date.now()}_${imageFile.name}`);
-          await uploadBytes(imageRef, imageFile);
-          imageUrl = await getDownloadURL(imageRef);
+          const uploadPromise = uploadBytes(imageRef, imageFile).then(() => getDownloadURL(imageRef));
+          const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Upload timeout')), 15000)
+          );
+          imageUrl = await Promise.race([uploadPromise, timeoutPromise]);
         } catch (err) {
           console.warn('Upload de imagem falhou, continuando sem imagem:', err.message);
+          imageUrl = '';
         }
       }
 
