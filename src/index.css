@@ -1,31 +1,71 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary-50: #eef2ff;
-  --color-primary-100: #e0e7ff;
-  --color-primary-200: #c7d2fe;
-  --color-primary-300: #a5b4fc;
-  --color-primary-400: #818cf8;
-  --color-primary-500: #6366f1;
-  --color-primary-600: #4f46e5;
-  --color-primary-700: #4338ca;
-  --color-primary-800: #3730a3;
-  --color-primary-900: #312e81;
+  /* ETUS Green Palette */
+  --color-primary-50: #E7FFDF;
+  --color-primary-100: #BDFBA6;
+  --color-primary-200: #C5F07A;
+  --color-primary-300: #8DF768;
+  --color-primary-400: #3BE476;
+  --color-primary-500: #066E3E;
+  --color-primary-600: #066E3E;
+  --color-primary-700: #044d2b;
+  --color-primary-800: #033d22;
+  --color-primary-900: #022c19;
 
-  --color-success-50: #f0fdf4;
-  --color-success-500: #22c55e;
-  --color-success-600: #16a34a;
+  /* Success - Green */
+  --color-success-50: #E7FFDF;
+  --color-success-500: #3BE476;
+  --color-success-600: #066E3E;
+  --color-success-700: #044d2b;
 
-  --color-warning-50: #fffbeb;
-  --color-warning-500: #f59e0b;
-  --color-warning-600: #d97706;
+  /* Warning - Yellow */
+  --color-warning-50: #FDFBBE;
+  --color-warning-100: #F7F5A6;
+  --color-warning-400: #F0EE7A;
+  --color-warning-500: #F0EE7A;
+  --color-warning-600: #d4d226;
+  --color-warning-700: #a8a71e;
 
-  --color-danger-50: #fef2f2;
-  --color-danger-500: #ef4444;
-  --color-danger-600: #dc2626;
+  /* Danger / Destructive - Pink */
+  --color-danger-50: #FDDEEF;
+  --color-danger-100: #FAD1E8;
+  --color-danger-500: #F5B3D8;
+  --color-danger-600: #e87dba;
+
+  /* Accent Blue */
+  --color-accent-50: #D2F4FC;
+  --color-accent-100: #BFEDF8;
+  --color-accent-500: #A0E3F3;
+
+  /* Neutral Palette */
+  --color-gray-50: #FBFAF9;
+  --color-gray-100: #F3F2EF;
+  --color-gray-200: #EBE9E5;
+  --color-gray-300: #D6D4D1;
+  --color-gray-400: #BEBBB7;
+  --color-gray-500: #908E89;
+  --color-gray-600: #6E6D68;
+  --color-gray-700: #3E3E3C;
+  --color-gray-800: #3E3E3C;
+  --color-gray-900: #151514;
 }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: #f8fafc;
+  font-family: 'Space Grotesk', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #FBFAF9;
+  color: #151514;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #BEBBB7; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #908E89; }
+
+/* Gradient backgrounds */
+.bg-gradient-etus {
+  background: linear-gradient(135deg, #066E3E 0%, #3BE476 50%, #8DF768 100%);
 }
