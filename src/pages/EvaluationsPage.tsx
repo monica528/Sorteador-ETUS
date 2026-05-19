@@ -134,7 +134,7 @@ export default function EvaluationsPage() {
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
               {(['speaking', 'listening', 'reading', 'writing', 'participation'] as const).map((skill) => (
                 <div key={skill} className="text-center">
-                  <label className="block text-sm font-medium text-gray-700 mb-1 capitalize">{skill === 'participation' ? 'Participação' : skill}</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1 capitalize" translate="no">{skill === 'participation' ? 'Participação' : skill}</label>
                   <input
                     type="range"
                     min="1"
@@ -226,7 +226,7 @@ export default function EvaluationsPage() {
                   { label: 'Participação', value: evaluation.participation },
                 ].map((skill) => (
                   <div key={skill.label} className="text-center p-2 bg-gray-50 rounded-lg">
-                    <p className="text-xs text-gray-500 mb-1">{skill.label}</p>
+                    <p className="text-xs text-gray-500 mb-1" translate="no">{skill.label}</p>
                     <p className={`text-lg font-bold ${skillColor(skill.value)}`}>{skill.value}</p>
                   </div>
                 ))}
