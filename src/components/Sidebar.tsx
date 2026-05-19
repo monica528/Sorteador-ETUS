@@ -13,6 +13,7 @@ import {
   UserCog,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useData } from '../contexts/DataContext';
 
 const adminLinks = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -42,6 +43,7 @@ const studentLinks = [
 
 export default function Sidebar() {
   const { user, logout } = useAuth();
+  const { showExamples, toggleExamples } = useData();
 
   const links =
     user?.role === 'admin'
@@ -84,6 +86,25 @@ export default function Sidebar() {
       </nav>
 
       <div className="p-4 border-t border-gray-200">
+        {user?.role === 'admin' && (
+          <button
+            onClick={toggleExamples}
+            className={`flex items-center gap-3 px-3 py-2 mb-3 w-full rounded-lg text-xs font-medium transition-colors ${
+              showExamples
+                ? 'bg-warning-50 text-warning-700 hover:bg-warning-100'
+                : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
+            }`}
+          >
+            <span className={`w-7 h-4 rounded-full relative transition-colors ${
+              showExamples ? 'bg-warning-400' : 'bg-gray-300'
+            }`}>
+              <span className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${
+                showExamples ? 'left-3.5' : 'left-0.5'
+              }`} />
+            </span>
+            {showExamples ? 'Exemplos visíveis' : 'Exemplos ocultos'}
+          </button>
+        )}
         <div className="flex items-center gap-3 px-3 py-2 mb-2">
           {user?.avatarUrl ? (
             <img src={user.avatarUrl} alt={user.name} className="w-8 h-8 rounded-full" referrerPolicy="no-referrer" />
