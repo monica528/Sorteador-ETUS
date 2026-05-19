@@ -1,4 +1,4 @@
-import { GraduationCap, LogIn, Loader2 } from 'lucide-react';
+import { LogIn, Loader2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function LoginPage() {
@@ -20,11 +20,11 @@ export default function LoginPage() {
 
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-etus rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <GraduationCap className="w-10 h-10 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold text-white mb-2">ETUS Academy</h1>
-          <p className="text-gray-400 font-light">Plataforma de Gestão de Desenvolvimento</p>
+          <img
+            src="/logo-etus-academy.png"
+            alt="ETUS Academy"
+            className="max-w-xs mx-auto mb-4"
+          />
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl p-8">
@@ -59,7 +59,7 @@ export default function LoginPage() {
           </div>
 
           <p className="text-xs text-gray-400 text-center mt-6">
-            ETUS Media &copy; {new Date().getFullYear()} &mdash; Plataforma interna
+            ETUS Media &copy; {new Date().getFullYear()} &mdash; Quem sonha evolui.
           </p>
         </div>
       </div>
