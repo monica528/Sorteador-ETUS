@@ -1,4 +1,4 @@
-import { Calendar, Clock, Users, Ticket, MapPin } from 'lucide-react';
+import { Calendar, Clock, Users, Ticket, MapPin, Trophy } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { getEventTypeInfo, formatDate } from '@/utils/constants';
@@ -62,6 +62,10 @@ export default function EventCard({ event, participantCount = 0, children, onCli
           <span className="flex items-center gap-1.5">
             <Ticket className="w-3.5 h-3.5 text-etus-dark" />
             {event.ticketCount || event.winnerCount || 1} ingresso{(event.ticketCount || event.winnerCount || 1) !== 1 ? 's' : ''}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Trophy className="w-3.5 h-3.5 text-accent-yellow" />
+            {event.winnerCount || 1} ganhador{(event.winnerCount || 1) !== 1 ? 'es' : ''}
           </span>
           {event.ticketType && (
             <span className="flex items-center gap-1.5">

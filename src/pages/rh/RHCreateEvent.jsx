@@ -65,7 +65,8 @@ export default function RHCreateEvent() {
           );
           imageUrl = await Promise.race([uploadPromise, timeoutPromise]);
         } catch (err) {
-          console.warn('Upload de imagem falhou, continuando sem imagem:', err.message);
+          console.warn('Upload de imagem falhou:', err.message);
+          alert('Upload de imagem falhou. O evento sera criado sem imagem. Para ativar upload, configure o Firebase Storage no console.');
           imageUrl = '';
         }
       }
