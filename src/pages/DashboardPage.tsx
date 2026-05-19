@@ -111,9 +111,9 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Status das Metas</h3>
-          <ResponsiveContainer width="100%" height={200}>
+          <ResponsiveContainer width="100%" height={160}>
             <PieChart>
-              <Pie data={goalStatusData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" label={({ name, value }) => `${name}: ${value}`}>
+              <Pie data={goalStatusData} cx="50%" cy="50%" innerRadius={40} outerRadius={70} dataKey="value">
                 {goalStatusData.map((_, index) => (
                   <Cell key={index} fill={COLORS[index % COLORS.length]} />
                 ))}
@@ -121,6 +121,14 @@ export default function DashboardPage() {
               <Tooltip />
             </PieChart>
           </ResponsiveContainer>
+          <div className="flex flex-wrap justify-center gap-3 mt-2">
+            {goalStatusData.map((entry, index) => (
+              <div key={entry.name} className="flex items-center gap-1.5">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
+                <span className="text-xs text-gray-600">{entry.name}: {entry.value}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="bg-white rounded-xl border border-gray-200 p-6 lg:col-span-2">
