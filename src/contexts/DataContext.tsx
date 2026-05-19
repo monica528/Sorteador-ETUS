@@ -27,6 +27,9 @@ interface DataContextType {
   teacherEvaluations: TeacherEvaluation[];
   teacherReports: TeacherReport[];
   performanceGoals: PerformanceGoal[];
+  addClassGroup: (group: Omit<ClassGroup, 'id' | 'createdAt'>) => void;
+  updateClassGroup: (id: string, data: Partial<ClassGroup>) => void;
+  deleteClassGroup: (id: string) => void;
   addLesson: (lesson: Omit<Lesson, 'id' | 'createdAt'>) => void;
   addAttendance: (record: Omit<AttendanceRecord, 'id' | 'createdAt'>) => void;
   addStudentFeedback: (feedback: Omit<StudentFeedback, 'id' | 'createdAt'>) => void;
@@ -42,13 +45,30 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export function DataProvider({ children }: { children: ReactNode }) {
-  const [classGroups] = useState<ClassGroup[]>(mockClassGroups);
+  const [classGroups, setClassGroups] = useState<ClassGroup[]>(mockClassGroups);
   const [lessons, setLessons] = useState<Lesson[]>(mockLessons);
   const [attendance, setAttendance] = useState<AttendanceRecord[]>(mockAttendance);
   const [studentFeedback, setStudentFeedback] = useState<StudentFeedback[]>(mockStudentFeedback);
   const [teacherEvaluations, setTeacherEvaluations] = useState<TeacherEvaluation[]>(mockTeacherEvaluations);
   const [teacherReports, setTeacherReports] = useState<TeacherReport[]>(mockTeacherReports);
   const [performanceGoals, setPerformanceGoals] = useState<PerformanceGoal[]>(mockPerformanceGoals);
+
+  const addClassGroup = useCallback((group: Omit<ClassGroup, 'id' | 'createdAt'>) => {
+    const newGroup: ClassGroup = {
+      ...group,
+      id: `class-${Date.now()}`,
+      createdAt: new Date().toISOString().split('T')[0],
+    };
+    setClassGroups((prev) => [...prev, newGroup]);
+  }, []);
+
+  const updateClassGroup = useCallback((id: string, data: Partial<ClassGroup>) => {
+    setClassGroups((prev) => prev.map((g) => (g.id === id ? { ...g, ...data } : g)));
+  }, []);
+
+  const deleteClassGroup = useCallback((id: string) => {
+    setClassGroups((prev) => prev.filter((g) => g.id !== id));
+  }, []);
 
   const addLesson = useCallback((lesson: Omit<Lesson, 'id' | 'createdAt'>) => {
     const newLesson: Lesson = {
@@ -141,6 +161,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
     <DataContext.Provider
       value={{
         classGroups,
+        addClassGroup,
+        updateClassGroup,
+        deleteClassGroup,
         lessons,
         attendance,
         studentFeedback,
