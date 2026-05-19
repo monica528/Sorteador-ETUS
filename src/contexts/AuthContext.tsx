@@ -3,16 +3,52 @@ import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
 import { auth, googleProvider } from '../lib/firebase';
 import type { User, UserRole } from '../types';
 
-const ADMIN_EMAILS = [
+const DEFAULT_ADMIN_EMAILS = [
   'monica@etus.com.br',
   'vanessa.teixeira@etus.com.br',
 ];
 
-const TEACHER_EMAILS: string[] = [];
+const ROLE_OVERRIDES_KEY = 'etus-academy-role-overrides';
+const KNOWN_USERS_KEY = 'etus-academy-known-users';
+
+interface KnownUser {
+  email: string;
+  name: string;
+  avatarUrl?: string;
+  lastLogin: string;
+}
+
+function getRoleOverrides(): Record<string, UserRole> {
+  try {
+    return JSON.parse(localStorage.getItem(ROLE_OVERRIDES_KEY) || '{}');
+  } catch {
+    return {};
+  }
+}
+
+function getKnownUsers(): KnownUser[] {
+  try {
+    return JSON.parse(localStorage.getItem(KNOWN_USERS_KEY) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function saveKnownUser(user: KnownUser) {
+  const users = getKnownUsers();
+  const idx = users.findIndex((u) => u.email === user.email);
+  if (idx >= 0) {
+    users[idx] = user;
+  } else {
+    users.push(user);
+  }
+  localStorage.setItem(KNOWN_USERS_KEY, JSON.stringify(users));
+}
 
 function getRoleByEmail(email: string): UserRole {
-  if (ADMIN_EMAILS.includes(email.toLowerCase())) return 'admin';
-  if (TEACHER_EMAILS.includes(email.toLowerCase())) return 'teacher';
+  const overrides = getRoleOverrides();
+  if (overrides[email.toLowerCase()]) return overrides[email.toLowerCase()];
+  if (DEFAULT_ADMIN_EMAILS.includes(email.toLowerCase())) return 'admin';
   return 'student';
 }
 
@@ -23,6 +59,9 @@ interface AuthContextType {
   isAuthenticated: boolean;
   loading: boolean;
   error: string | null;
+  knownUsers: KnownUser[];
+  setUserRole: (email: string, role: UserRole) => void;
+  getUserRole: (email: string) => UserRole;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -31,6 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [knownUsers, setKnownUsers] = useState<KnownUser[]>(getKnownUsers());
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
@@ -44,6 +84,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           avatarUrl: firebaseUser.photoURL || undefined,
           createdAt: new Date().toISOString(),
         });
+        const knownUser: KnownUser = {
+          email: firebaseUser.email,
+          name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
+          avatarUrl: firebaseUser.photoURL || undefined,
+          lastLogin: new Date().toISOString(),
+        };
+        saveKnownUser(knownUser);
+        setKnownUsers(getKnownUsers());
       } else {
         setUser(null);
       }
@@ -73,8 +121,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const setUserRole = useCallback((email: string, role: UserRole) => {
+    const overrides = getRoleOverrides();
+    overrides[email.toLowerCase()] = role;
+    localStorage.setItem(ROLE_OVERRIDES_KEY, JSON.stringify(overrides));
+    if (user && user.email.toLowerCase() === email.toLowerCase()) {
+      setUser({ ...user, role });
+    }
+  }, [user]);
+
+  const getUserRole = useCallback((email: string): UserRole => {
+    return getRoleByEmail(email);
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, loginWithGoogle, logout, isAuthenticated: !!user, loading, error }}>
+    <AuthContext.Provider value={{
+      user, loginWithGoogle, logout, isAuthenticated: !!user, loading, error,
+      knownUsers, setUserRole, getUserRole,
+    }}>
       {children}
     </AuthContext.Provider>
   );
