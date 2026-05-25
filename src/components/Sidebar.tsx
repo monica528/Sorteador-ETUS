@@ -11,6 +11,7 @@ import {
   LogOut,
   GraduationCap,
   UserCog,
+  Award,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
@@ -24,6 +25,7 @@ const adminLinks = [
   { to: '/avaliacoes', label: 'Avaliações', icon: Star },
   { to: '/relatorios', label: 'Relatórios', icon: FileText },
   { to: '/desempenho', label: 'Desempenho', icon: Target },
+  { to: '/certificados', label: 'Certificados', icon: Award },
   { to: '/usuarios', label: 'Usuários', icon: UserCog },
 ];
 
